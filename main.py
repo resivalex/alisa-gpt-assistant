@@ -1,25 +1,19 @@
 import os
 import dotenv
 
-from alisa_gpt_assistant import Conversation, OpenAiClient
+from alisa_gpt_assistant.protocols import DialogProtocol
+from alisa_gpt_assistant import GptAssistantDialogFactory
 
 dotenv.load_dotenv()
 
 
 api_key = os.environ["OPENAI_API_KEY"]
-assistant_1_id = os.environ["ASSISTANT_1_ID"]
-assistant_2_id = os.environ["ASSISTANT_2_ID"]
+assistant_id = os.environ["ASSISTANT_ID"]
 
-assistant_1 = {
-    "id": assistant_1_id,
-    "name": "C",
-}
-assistant_2 = {
-    "id": assistant_2_id,
-    "name": "F",
-}
+dialog: DialogProtocol = GptAssistantDialogFactory().create(api_key, assistant_id)
 
 
-client = OpenAiClient(api_key)
-conversation = Conversation(client, assistant_1, assistant_2, "rainy day", 5)
-conversation.start()
+while True:
+    message = input("You: ")
+    response = dialog.send(message)
+    print(f"Bot: {response}")

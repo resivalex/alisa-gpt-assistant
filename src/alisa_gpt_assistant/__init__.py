@@ -1,5 +1,6 @@
-from .conversation import Conversation
-from .open_ai_client import OpenAiClient
+from .gpt import AssistantDialogFactory as GptAssistantDialogFactory
 
 
-__all__ = ["Conversation", "OpenAiClient"]
+__all__ = [
+    "GptAssistantDialogFactory",
+]
