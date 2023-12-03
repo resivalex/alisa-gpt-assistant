@@ -20,6 +20,10 @@ PORT = int(os.environ["PORT"])
 WAIT_MESSAGE = os.environ["WAIT_MESSAGE"]
 NOT_READY_MESSAGE = os.environ["NOT_READY_MESSAGE"]
 ERROR_MESSAGE = os.environ["ERROR_MESSAGE"]
+START_TRIGGER = os.environ["START_TRIGGER"]
+WELCOME_MESSAGE = os.environ["WELCOME_MESSAGE"]
+STOP_TRIGGER = os.environ["STOP_TRIGGER"]
+GOODBYE_MESSAGE = os.environ["GOODBYE_MESSAGE"]
 
 
 dialog_factory = GptAssistantDialogFactory(OPENAI_API_KEY, ASSISTANT_ID)
@@ -28,6 +32,10 @@ session_dialog = SessionDialog(
     wait_message=WAIT_MESSAGE,
     not_ready_message=NOT_READY_MESSAGE,
     error_message=ERROR_MESSAGE,
+    start_trigger=START_TRIGGER,
+    welcome_message=WELCOME_MESSAGE,
+    stop_trigger=STOP_TRIGGER,
+    goodbye_message=GOODBYE_MESSAGE,
 )
 request_to_response = YandexDialogsRequestToResponse(session_dialog)
 webhook_processor = FastApiWebhookProcessor(
