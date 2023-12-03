@@ -24,6 +24,8 @@ START_TRIGGER = os.environ["START_TRIGGER"]
 WELCOME_MESSAGE = os.environ["WELCOME_MESSAGE"]
 STOP_TRIGGER = os.environ["STOP_TRIGGER"]
 GOODBYE_MESSAGE = os.environ["GOODBYE_MESSAGE"]
+CONTINUE_MESSAGE = os.environ["CONTINUE_MESSAGE"]
+CONTINUE_TRIGGER = os.environ["CONTINUE_TRIGGER"]
 
 
 dialog_factory = GptAssistantDialogFactory(OPENAI_API_KEY, ASSISTANT_ID)
@@ -36,6 +38,8 @@ session_dialog = SessionDialog(
     welcome_message=WELCOME_MESSAGE,
     stop_trigger=STOP_TRIGGER,
     goodbye_message=GOODBYE_MESSAGE,
+    continue_message=CONTINUE_MESSAGE,
+    continue_trigger=CONTINUE_TRIGGER,
 )
 request_to_response = YandexDialogsRequestToResponse(session_dialog)
 webhook_processor = FastApiWebhookProcessor(

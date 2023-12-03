@@ -4,6 +4,8 @@ from alisa_gpt_assistant.protocols import SessionDialogProtocol, DialogFactoryPr
 
 
 class SessionDialog(SessionDialogProtocol):
+    MAX_MESSAGE_LENGTH = 1000
+
     def __init__(
         self,
         dialog_factory: DialogFactoryProtocol,
@@ -14,6 +16,8 @@ class SessionDialog(SessionDialogProtocol):
         welcome_message: str,
         stop_trigger: str,
         goodbye_message: str,
+        continue_message: str,
+        continue_trigger: str,
     ):
         self.dialog_factory = dialog_factory
         self.wait_message = wait_message
@@ -23,16 +27,37 @@ class SessionDialog(SessionDialogProtocol):
         self.welcome_message = welcome_message
         self.stop_trigger = stop_trigger
         self.goodbye_message = goodbye_message
+        self.continue_message = continue_message
+        self.continue_trigger = continue_trigger
 
         self.dialog = None
         self.processing_queue = Queue()
         self.is_processing = False
+        self.unread_dialog_text = ""
+
+    def _read_dialog_text_in_parts(self):
+        text = self.unread_dialog_text
+        if len(text) > self.MAX_MESSAGE_LENGTH:
+            self.unread_dialog_text = text[self.MAX_MESSAGE_LENGTH :]
+            return text[: self.MAX_MESSAGE_LENGTH] + self.continue_message
+        else:
+            self.unread_dialog_text = ""
+            return text
 
     def send(
         self, data: SessionDialogProtocol.InputData
     ) -> SessionDialogProtocol.OutputData:
         message = data["message"]
         new_session = data["new_session"]
+
+        if self.unread_dialog_text:
+            if message.strip().lower() == self.continue_trigger.lower():
+                return {
+                    "message": self._read_dialog_text_in_parts(),
+                    "end_session": False,
+                }
+            else:
+                self.remaining_text = ""
 
         if message.strip().lower() == self.stop_trigger.lower():
             return {
@@ -73,8 +98,10 @@ class SessionDialog(SessionDialogProtocol):
                 "end_session": False,
             }
 
+        self.unread_dialog_text = result["text"]
+
         return {
-            "message": result["text"],
+            "message": self._read_dialog_text_in_parts(),
             "end_session": False,
         }
 
