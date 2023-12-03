@@ -1,6 +1,6 @@
-from .message_source import MessageSource as FastApiMessageSource
+from .webhook_processor import WebhookProcessor as FastApiWebhookProcessor
 
 
 __all__ = [
-    "FastApiMessageSource",
+    "FastApiWebhookProcessor",
 ]

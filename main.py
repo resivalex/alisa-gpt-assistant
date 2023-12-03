@@ -1,8 +1,11 @@
 import os
 import dotenv
 
-from alisa_gpt_assistant.protocols import DialogProtocol, MessageSourceProtocol
-from alisa_gpt_assistant import GptAssistantDialogFactory, FastApiMessageSource
+from alisa_gpt_assistant import (
+    GptAssistantDialogFactory,
+    FastApiWebhookProcessor,
+    YandexDialogsRequestToResponse,
+)
 
 dotenv.load_dotenv()
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
@@ -12,20 +15,15 @@ HOST = os.environ["HOST"]
 PORT = int(os.environ["PORT"])
 
 
-dialog: DialogProtocol = GptAssistantDialogFactory().create(
-    OPENAI_API_KEY, ASSISTANT_ID
+dialog = GptAssistantDialogFactory().create(OPENAI_API_KEY, ASSISTANT_ID)
+
+request_to_response = YandexDialogsRequestToResponse(dialog.send)
+webhook_processor = FastApiWebhookProcessor(
+    webhook_path=WEBHOOK_PATH,
+    host=HOST,
+    port=PORT,
+    body_mapper=request_to_response.map,
 )
 
-
-def connect_dialog_to_source(dialog: DialogProtocol, source: MessageSourceProtocol):
-    def process_message(message: str) -> str:
-        return dialog.send(message)
-
-    source.register(process_message)
-
-
-fast_api_source = FastApiMessageSource(WEBHOOK_PATH, HOST, PORT)
-
 if __name__ == "__main__":
-    connect_dialog_to_source(dialog, fast_api_source)
-    fast_api_source.run()
+    webhook_processor.run()
