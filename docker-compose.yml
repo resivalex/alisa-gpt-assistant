@@ -1,0 +1,9 @@
+version: '3.9'
+services:
+  app:
+    container_name: alisa_gpt_assistant
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"

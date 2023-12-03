@@ -1,5 +1,8 @@
 import os
 import dotenv
+import sys
+
+sys.path.append("./src")
 
 from alisa_gpt_assistant import (
     GptAssistantDialogFactory,
