@@ -59,22 +59,22 @@ class SessionDialog(SessionDialogProtocol):
             }
 
         if not self.processing_queue.empty():
-            result = self.processing_queue.get_nowait()
-            self.is_processing = False
-
-            if result["status"] == "failed":
-                return {
-                    "message": self.error_message,
-                    "end_session": False,
-                }
-
             return {
-                "message": result["text"],
+                "message": self.not_ready_message,
+                "end_session": False,
+            }
+
+        result = self.processing_queue.get_nowait()
+        self.is_processing = False
+
+        if result["status"] == "failed":
+            return {
+                "message": self.error_message,
                 "end_session": False,
             }
 
         return {
-            "message": self.not_ready_message,
+            "message": result["text"],
             "end_session": False,
         }
 
