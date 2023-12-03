@@ -5,8 +5,11 @@ from .assistant_dialog import AssistantDialog
 
 
 class AssistantDialogFactory:
-    def create(self, open_api_key: str, assistant_id: str) -> DialogProtocol:
-        client = OpenAiClient(open_api_key)
-        thread = client.create_thread()
+    def __init__(self, open_api_key: str, assistant_id: str):
+        self.client = OpenAiClient(open_api_key)
+        self.assistant_id = assistant_id
 
-        return AssistantDialog(client, assistant_id, thread.id)
+    def create(self) -> DialogProtocol:
+        thread = self.client.create_thread()
+
+        return AssistantDialog(self.client, self.assistant_id, thread.id)

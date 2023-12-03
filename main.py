@@ -8,8 +8,6 @@ from alisa_gpt_assistant import (
     SessionDialog,
 )
 
-# from alisa_gpt_assistant.stubs import ExclamationDialog
-
 dotenv.load_dotenv()
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
@@ -19,10 +17,18 @@ WEBHOOK_PATH = os.environ["WEBHOOK_PATH"]
 HOST = os.environ["HOST"]
 PORT = int(os.environ["PORT"])
 
+WAIT_MESSAGE = os.environ["WAIT_MESSAGE"]
+NOT_READY_MESSAGE = os.environ["NOT_READY_MESSAGE"]
+ERROR_MESSAGE = os.environ["ERROR_MESSAGE"]
 
-dialog = GptAssistantDialogFactory().create(OPENAI_API_KEY, ASSISTANT_ID)
-# dialog = ExclamationDialog()
-session_dialog = SessionDialog(dialog.send)
+
+dialog_factory = GptAssistantDialogFactory(OPENAI_API_KEY, ASSISTANT_ID)
+session_dialog = SessionDialog(
+    dialog_factory,
+    wait_message=WAIT_MESSAGE,
+    not_ready_message=NOT_READY_MESSAGE,
+    error_message=ERROR_MESSAGE,
+)
 request_to_response = YandexDialogsRequestToResponse(session_dialog)
 webhook_processor = FastApiWebhookProcessor(
     webhook_path=WEBHOOK_PATH,

@@ -6,6 +6,11 @@ class DialogProtocol(Protocol):
         ...
 
 
+class DialogFactoryProtocol(Protocol):
+    def create(self) -> DialogProtocol:
+        ...
+
+
 class SessionDialogProtocol(Protocol):
     class InputData(TypedDict):
         message: str
