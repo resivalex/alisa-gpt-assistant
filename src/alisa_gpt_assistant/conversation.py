@@ -1,17 +1,20 @@
-import time
+from typing import TypedDict
 import threading
 
-from alisa_gpt_assistant.protocols import AssistantProtocol
-
 from .open_ai_client import OpenAiClient
+
+
+class Assistant(TypedDict):
+    id: str
+    name: str
 
 
 class Conversation:
     def __init__(
         self,
         client: OpenAiClient,
-        assistant_1: AssistantProtocol,
-        assistant_2: AssistantProtocol,
+        assistant_1: Assistant,
+        assistant_2: Assistant,
         topic: str,
         message_count: int,
     ):
@@ -31,9 +34,9 @@ class Conversation:
             args=(
                 start_message,
                 self.assistant_1,
-                thread_1,
+                thread_1.id,
                 self.assistant_2,
-                thread_2,
+                thread_2.id,
                 self.message_count,
             ),
         )
@@ -43,28 +46,23 @@ class Conversation:
     def _assistant_conversation(
         self,
         start_message,
-        assistant_a: AssistantProtocol,
-        thread_a,
-        assistant_b: AssistantProtocol,
-        thread_b,
+        assistant_a: Assistant,
+        thread_a_id,
+        assistant_b: Assistant,
+        thread_b_id,
         msg_limit: int,
     ):
         message_content = start_message
 
         for i in range(msg_limit):
-            print(assistant_a.speak() + f" (Turn {i + 1})")
+            print(f"{i + 1}. {assistant_a['name']}...")
 
-            self.client.send_message(thread_a.id, "user", message_content)
-            run = self.client.run_assistant(thread_a.id, assistant_a.get_id())
-
-            while True:
-                run_status = self.client.get_run_status(thread_a.id, run.id)
-                if run_status.status == "completed":
-                    break
-                time.sleep(1)
-
-            message_content = self.client.get_last_assistant_message(thread_a.id)
+            message_content = self.client.ask_and_get_response(
+                assistant_a["id"],
+                thread_a_id,
+                message_content,
+            )
             print(message_content + "\n")
 
             assistant_a, assistant_b = assistant_b, assistant_a
-            thread_a, thread_b = thread_b, thread_a
+            thread_a_id, thread_b_id = thread_b_id, thread_a_id
