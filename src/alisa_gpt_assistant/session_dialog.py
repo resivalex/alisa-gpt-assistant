@@ -4,7 +4,8 @@ from alisa_gpt_assistant.protocols import SessionDialogProtocol, DialogFactoryPr
 
 
 class SessionDialog(SessionDialogProtocol):
-    MAX_MESSAGE_LENGTH = 1000
+    MAX_MESSAGE_LENGTH = 1020
+    SEARCH_WORD_BORDER_RANGE = 20
 
     def __init__(
         self,
@@ -37,9 +38,23 @@ class SessionDialog(SessionDialogProtocol):
 
     def _read_dialog_text_in_parts(self):
         text = self.unread_dialog_text
+
         if len(text) > self.MAX_MESSAGE_LENGTH:
-            self.unread_dialog_text = text[self.MAX_MESSAGE_LENGTH :]
-            return text[: self.MAX_MESSAGE_LENGTH] + self.continue_message
+            continue_message = f"... {self.continue_message}"
+            max_length = self.MAX_MESSAGE_LENGTH - len(continue_message)
+            cutoff = max_length
+            while cutoff > max_length - self.SEARCH_WORD_BORDER_RANGE and cutoff > 0:
+                if text[cutoff].isspace():
+                    break
+                cutoff -= 1
+
+            if not text[cutoff].isspace():
+                cutoff = max_length
+
+            part = text[:cutoff].rstrip()
+            self.unread_dialog_text = text[cutoff:].lstrip()
+
+            return part + continue_message
         else:
             self.unread_dialog_text = ""
             return text
@@ -98,7 +113,7 @@ class SessionDialog(SessionDialogProtocol):
                 "end_session": False,
             }
 
-        self.unread_dialog_text = result["text"]
+        self.unread_dialog_text = result["text"].strip()
 
         return {
             "message": self._read_dialog_text_in_parts(),
