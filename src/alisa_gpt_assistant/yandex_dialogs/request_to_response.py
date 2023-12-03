@@ -1,19 +1,25 @@
-from typing import Callable
+from alisa_gpt_assistant.protocols import SessionDialogProtocol
 
 
 class RequestToResponse:
-    def __init__(self, message_mapper: Callable[[str], str]):
-        self.message_mapper = message_mapper
+    def __init__(self, session_dialog: SessionDialogProtocol):
+        self.session_dialog = session_dialog
 
     def map(self, request: dict) -> dict:
         message = request["request"]["original_utterance"]
+        new_session = request["session"]["new"]
 
-        reply = self.message_mapper(message)
+        reply = self.session_dialog.send(
+            {
+                "message": message,
+                "new_session": new_session,
+            }
+        )
 
         return {
             "response": {
-                "text": reply,
-                "end_session": False,
+                "text": reply["message"],
+                "end_session": reply["end_session"],
             },
             "session": request["session"],
             "version": request["version"],
