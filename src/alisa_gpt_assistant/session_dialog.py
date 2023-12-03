@@ -58,7 +58,7 @@ class SessionDialog(SessionDialogProtocol):
                 "end_session": False,
             }
 
-        if not self.processing_queue.empty():
+        if self.processing_queue.empty():
             return {
                 "message": self.not_ready_message,
                 "end_session": False,
