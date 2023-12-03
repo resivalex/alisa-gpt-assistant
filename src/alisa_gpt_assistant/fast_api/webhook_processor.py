@@ -11,7 +11,7 @@ class WebhookProcessor:
         port: int,
         body_mapper: Callable[[dict], dict],
     ):
-        self.app = FastAPI()
+        self.app = FastAPI(docs_url=None, redoc_url=None)
         self.host = host
         self.port = port
         self.webhook_path = webhook_path
