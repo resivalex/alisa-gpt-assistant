@@ -1,4 +1,4 @@
-from .message_source import FastApiMessageSource
+from .message_source import MessageSource as FastApiMessageSource
 
 
 __all__ = [

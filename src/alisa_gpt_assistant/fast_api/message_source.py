@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import uvicorn
 
 
-class FastApiMessageSource:
+class MessageSource:
     def __init__(self, webhook_path: str, host: str, port: int):
         self.app = FastAPI()
         self.host = host
