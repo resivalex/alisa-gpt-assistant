@@ -1,29 +1,31 @@
 import os
 import dotenv
-from fastapi import FastAPI
-import uvicorn
 
-from alisa_gpt_assistant.protocols import DialogProtocol
-from alisa_gpt_assistant import GptAssistantDialogFactory
+from alisa_gpt_assistant.protocols import DialogProtocol, MessageSourceProtocol
+from alisa_gpt_assistant import GptAssistantDialogFactory, FastApiMessageSource
 
 dotenv.load_dotenv()
-
-api_key = os.environ["OPENAI_API_KEY"]
-assistant_id = os.environ["ASSISTANT_ID"]
-webhook_path = os.environ["WEBHOOK_PATH"]
-host = os.environ["HOST"]
-port = int(os.environ["PORT"])
-
-dialog: DialogProtocol = GptAssistantDialogFactory().create(api_key, assistant_id)
-
-app = FastAPI()
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+ASSISTANT_ID = os.environ["ASSISTANT_ID"]
+WEBHOOK_PATH = os.environ["WEBHOOK_PATH"]
+HOST = os.environ["HOST"]
+PORT = int(os.environ["PORT"])
 
 
-@app.get(webhook_path)
-async def webhook(message: str):
-    response = dialog.send(message)
-    return {"response": response}
+dialog: DialogProtocol = GptAssistantDialogFactory().create(
+    OPENAI_API_KEY, ASSISTANT_ID
+)
 
+
+def connect_dialog_to_source(dialog: DialogProtocol, source: MessageSourceProtocol):
+    def process_message(message: str) -> str:
+        return dialog.send(message)
+
+    source.register(process_message)
+
+
+fast_api_source = FastApiMessageSource(WEBHOOK_PATH, HOST, PORT)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    connect_dialog_to_source(dialog, fast_api_source)
+    fast_api_source.run()
