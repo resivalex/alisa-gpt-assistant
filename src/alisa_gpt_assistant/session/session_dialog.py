@@ -72,10 +72,14 @@ class SessionDialog(SessionDialogProtocol):
         if new_session or self.dialog is None:
             self.dialog = self.dialog_factory.create()
 
-        if not self.message_processing.in_progress():
-            self.message_processing.process_message(message, self.dialog.send)
+        if self.message_processing.in_progress():
+            return {
+                "message": self.not_ready_message,
+                "end_session": False,
+            }
 
-        if not self.message_processing.ready():
+        if not self.message_processing.has_result():
+            self.message_processing.process_message(message, self.dialog.send)
             return {
                 "message": self.wait_message,
                 "end_session": False,

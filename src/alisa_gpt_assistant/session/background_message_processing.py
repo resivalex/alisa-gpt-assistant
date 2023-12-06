@@ -47,13 +47,13 @@ class BackgroundMessageProcessing:
     def in_progress(self) -> bool:
         return self._is_processing
 
-    def ready(self) -> bool:
+    def has_result(self) -> bool:
         return not self._processing_queue.empty()
 
     def get_result(self) -> _MessageProcessingResult:
         if self._is_processing:
             raise Exception("Processing is in progress")
-        if not self.ready():
-            raise Exception("Result is not ready")
+        if not self.has_result():
+            raise Exception("No result")
 
         return self._processing_queue.get_nowait()
