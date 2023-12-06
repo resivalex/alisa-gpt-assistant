@@ -1,9 +1,7 @@
-import threading
-from queue import Queue
-
 from alisa_gpt_assistant.protocols import SessionDialogProtocol, DialogFactoryProtocol
 
 from .long_text_reader import LongTextReader
+from .background_message_processing import BackgroundMessageProcessing
 
 
 class SessionDialog(SessionDialogProtocol):
@@ -32,9 +30,8 @@ class SessionDialog(SessionDialogProtocol):
         self.confirm_trigger = confirm_trigger
 
         self.dialog = None
-        self.processing_queue = Queue()
-        self.is_processing = False
         self.text_reader = LongTextReader(continue_message)
+        self.message_processing = BackgroundMessageProcessing()
 
     def send(
         self, data: SessionDialogProtocol.InputData
@@ -67,22 +64,16 @@ class SessionDialog(SessionDialogProtocol):
         if new_session or self.dialog is None:
             self.dialog = self.dialog_factory.create()
 
-        if not self.is_processing:
-            self.is_processing = True
-            threading.Thread(target=self._process_message, args=(message,)).start()
+        if not self.message_processing.in_progress():
+            self.message_processing.process_message(message, self.dialog.send)
+
+        if not self.message_processing.ready():
             return {
                 "message": self.wait_message,
                 "end_session": False,
             }
 
-        if self.processing_queue.empty():
-            return {
-                "message": self.not_ready_message,
-                "end_session": False,
-            }
-
-        result = self.processing_queue.get_nowait()
-        self.is_processing = False
+        result = self.message_processing.get_result()
 
         if result["status"] == "failed":
             return {
@@ -96,11 +87,3 @@ class SessionDialog(SessionDialogProtocol):
             "message": self.text_reader.read_next_part(),
             "end_session": False,
         }
-
-    def _process_message(self, message):
-        try:
-            reply = self.dialog.send(message)
-            self.processing_queue.put({"status": "completed", "text": reply})
-        except Exception as e:
-            self.processing_queue.put({"status": "failed"})
-            raise e
