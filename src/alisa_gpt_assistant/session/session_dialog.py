@@ -111,6 +111,7 @@ class SessionDialog(SessionDialogProtocol):
         if self.dialog is None:
             self.dialog = self.dialog_factory.create()
         self.message_processing.process_message(message, self.dialog.send)
+        self.text_reader.clear_text()
 
         return {
             "message": self.wait_message,
