@@ -16,7 +16,10 @@ class SessionDialog(SessionDialogProtocol):
         stop_trigger: str,
         goodbye_message: str,
         continue_message: str,
-        confirm_trigger: str,
+        check_trigger: str,
+        no_request_message: str,
+        further_trigger: str,
+        further_message: str,
     ):
         self.dialog_factory = dialog_factory
         self.wait_message = wait_message
@@ -27,7 +30,10 @@ class SessionDialog(SessionDialogProtocol):
         self.stop_trigger = stop_trigger
         self.goodbye_message = goodbye_message
         self.continue_message = continue_message
-        self.confirm_trigger = confirm_trigger
+        self.check_trigger = check_trigger
+        self.no_request_message = no_request_message
+        self.further_trigger = further_trigger
+        self.further_message = further_message
 
         self.dialog = None
         self.text_reader = LongTextReader(continue_message)
@@ -42,18 +48,19 @@ class SessionDialog(SessionDialogProtocol):
         self, data: SessionDialogProtocol.InputData
     ) -> SessionDialogProtocol.OutputData:
         message = data["message"]
-        new_session = data["new_session"]
+        _new_session = data["new_session"]
 
-        if self.text_reader.has_unread_text():
-            if message.strip().lower() == self.confirm_trigger.lower():
-                return {
-                    "message": self.text_reader.read_next_part(),
-                    "end_session": False,
-                }
-            else:
-                self.text_reader.clear_text()
-
+        trigger = ""
+        if message.strip().lower() in [self.start_trigger.lower(), ""]:
+            trigger = "start"
         if message.strip().lower() == self.stop_trigger.lower():
+            trigger = "stop"
+        if message.strip().lower() == self.check_trigger.lower():
+            trigger = "check"
+        if message.strip().lower() == self.further_trigger.lower():
+            trigger = "further"
+
+        if trigger == "stop":
             self._reset_session()
 
             return {
@@ -61,7 +68,7 @@ class SessionDialog(SessionDialogProtocol):
                 "end_session": True,
             }
 
-        if message.strip().lower() in [self.start_trigger.lower(), ""]:
+        if trigger == "start":
             self._reset_session()
 
             return {
@@ -69,33 +76,43 @@ class SessionDialog(SessionDialogProtocol):
                 "end_session": False,
             }
 
-        if new_session or self.dialog is None:
-            self.dialog = self.dialog_factory.create()
-
         if self.message_processing.in_progress():
             return {
                 "message": self.not_ready_message,
-                "end_session": False,
+                "end_session": True,
             }
 
-        if not self.message_processing.has_result():
-            self.message_processing.process_message(message, self.dialog.send)
+        if self.message_processing.has_result():
+            result = self.message_processing.pop_result()
+            text_to_read = result["text"].strip()
+            if result["status"] == "failed":
+                text_to_read = self.error_message
+
+            self.text_reader.set_text_to_read(text_to_read)
+
+        if trigger == "check":
+            if self.text_reader.has_unread_text():
+                return {
+                    "message": self.text_reader.read_next_part(),
+                    "end_session": True,
+                }
+            else:
+                return {
+                    "message": self.no_request_message,
+                    "end_session": True,
+                }
+
+        if trigger == "further":
             return {
-                "message": self.wait_message,
+                "message": self.further_message,
                 "end_session": False,
             }
 
-        result = self.message_processing.get_result()
-
-        if result["status"] == "failed":
-            return {
-                "message": self.error_message,
-                "end_session": False,
-            }
-
-        self.text_reader.set_text_to_read(result["text"].strip())
+        if self.dialog is None:
+            self.dialog = self.dialog_factory.create()
+        self.message_processing.process_message(message, self.dialog.send)
 
         return {
-            "message": self.text_reader.read_next_part(),
-            "end_session": False,
+            "message": self.wait_message,
+            "end_session": True,
         }

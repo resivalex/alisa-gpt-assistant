@@ -50,7 +50,7 @@ class BackgroundMessageProcessing:
     def has_result(self) -> bool:
         return not self._processing_queue.empty()
 
-    def get_result(self) -> _MessageProcessingResult:
+    def pop_result(self) -> _MessageProcessingResult:
         if self._is_processing:
             raise Exception("Processing is in progress")
         if not self.has_result():
