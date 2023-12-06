@@ -18,7 +18,7 @@ class SessionDialog(SessionDialogProtocol):
         stop_trigger: str,
         goodbye_message: str,
         continue_message: str,
-        continue_trigger: str,
+        confirm_trigger: str,
     ):
         self.dialog_factory = dialog_factory
         self.wait_message = wait_message
@@ -29,7 +29,7 @@ class SessionDialog(SessionDialogProtocol):
         self.stop_trigger = stop_trigger
         self.goodbye_message = goodbye_message
         self.continue_message = continue_message
-        self.continue_trigger = continue_trigger
+        self.confirm_trigger = confirm_trigger
 
         self.dialog = None
         self.processing_queue = Queue()
@@ -43,7 +43,7 @@ class SessionDialog(SessionDialogProtocol):
         new_session = data["new_session"]
 
         if self.text_reader.has_unread_text():
-            if message.strip().lower() == self.continue_trigger.lower():
+            if message.strip().lower() == self.confirm_trigger.lower():
                 return {
                     "message": self.text_reader.read_next_part(),
                     "end_session": False,

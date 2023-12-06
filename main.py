@@ -30,7 +30,7 @@ WELCOME_MESSAGE = os.environ["WELCOME_MESSAGE"]
 STOP_TRIGGER = os.environ["STOP_TRIGGER"]
 GOODBYE_MESSAGE = os.environ["GOODBYE_MESSAGE"]
 CONTINUE_MESSAGE = os.environ["CONTINUE_MESSAGE"]
-CONTINUE_TRIGGER = os.environ["CONTINUE_TRIGGER"]
+CONFIRM_TRIGGER = os.environ["CONFIRM_TRIGGER"]
 
 
 def create_session_dialog(dialog_factory: DialogFactoryProtocol) -> SessionDialog:
@@ -44,7 +44,7 @@ def create_session_dialog(dialog_factory: DialogFactoryProtocol) -> SessionDialo
         stop_trigger=STOP_TRIGGER,
         goodbye_message=GOODBYE_MESSAGE,
         continue_message=CONTINUE_MESSAGE,
-        continue_trigger=CONTINUE_TRIGGER,
+        confirm_trigger=CONFIRM_TRIGGER,
     )
 
     return session_dialog
