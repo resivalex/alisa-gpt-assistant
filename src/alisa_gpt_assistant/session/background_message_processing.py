@@ -40,9 +40,11 @@ class BackgroundMessageProcessing:
             args=(message, callback, self._current_thread_order_number),
         ).start()
 
-    def terminate(self) -> None:
+    def reset(self) -> None:
         self._is_processing = False
         self._current_thread_order_number += 1
+        if not self._processing_queue.empty():
+            self._processing_queue.get_nowait()
 
     def in_progress(self) -> bool:
         return self._is_processing

@@ -42,7 +42,7 @@ class SessionDialog(SessionDialogProtocol):
     def _reset_session(self):
         self.dialog = None
         self.text_reader.clear_text()
-        self.message_processing.terminate()
+        self.message_processing.reset()
 
     def send(
         self, data: SessionDialogProtocol.InputData
