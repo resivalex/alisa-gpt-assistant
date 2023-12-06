@@ -1,12 +1,12 @@
 import threading
 from queue import Queue
+
 from alisa_gpt_assistant.protocols import SessionDialogProtocol, DialogFactoryProtocol
+
+from .long_text_reader import LongTextReader
 
 
 class SessionDialog(SessionDialogProtocol):
-    MAX_MESSAGE_LENGTH = 1020
-    SEARCH_WORD_BORDER_RANGE = 20
-
     def __init__(
         self,
         dialog_factory: DialogFactoryProtocol,
@@ -34,31 +34,7 @@ class SessionDialog(SessionDialogProtocol):
         self.dialog = None
         self.processing_queue = Queue()
         self.is_processing = False
-        self.unread_dialog_text = ""
-
-    def _find_cutoff_point(self, text, max_length):
-        cutoff = max_length
-        while cutoff > max_length - self.SEARCH_WORD_BORDER_RANGE and cutoff > 0:
-            if text[cutoff].isspace():
-                break
-            cutoff -= 1
-        return cutoff if text[cutoff].isspace() else max_length
-
-    def _read_dialog_text_in_parts(self):
-        text = self.unread_dialog_text
-
-        if len(text) > self.MAX_MESSAGE_LENGTH:
-            continue_message = f"... {self.continue_message}"
-            max_length = self.MAX_MESSAGE_LENGTH - len(continue_message)
-            cutoff = self._find_cutoff_point(text, max_length)
-
-            part = text[:cutoff].rstrip()
-            self.unread_dialog_text = text[cutoff:].lstrip()
-
-            return part + continue_message
-        else:
-            self.unread_dialog_text = ""
-            return text
+        self.text_reader = LongTextReader(continue_message)
 
     def send(
         self, data: SessionDialogProtocol.InputData
@@ -66,14 +42,14 @@ class SessionDialog(SessionDialogProtocol):
         message = data["message"]
         new_session = data["new_session"]
 
-        if self.unread_dialog_text:
+        if self.text_reader.has_unread_text():
             if message.strip().lower() == self.continue_trigger.lower():
                 return {
-                    "message": self._read_dialog_text_in_parts(),
+                    "message": self.text_reader.read_next_part(),
                     "end_session": False,
                 }
             else:
-                self.remaining_text = ""
+                self.text_reader.clear_text()
 
         if message.strip().lower() == self.stop_trigger.lower():
             return {
@@ -114,10 +90,10 @@ class SessionDialog(SessionDialogProtocol):
                 "end_session": False,
             }
 
-        self.unread_dialog_text = result["text"].strip()
+        self.text_reader.set_text_to_read(result["text"].strip())
 
         return {
-            "message": self._read_dialog_text_in_parts(),
+            "message": self.text_reader.read_next_part(),
             "end_session": False,
         }
 

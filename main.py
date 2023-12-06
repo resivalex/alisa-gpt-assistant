@@ -80,5 +80,5 @@ def setup_dialog_processor(debug=False) -> DialogProcessorProtocol:
 
 
 if __name__ == "__main__":
-    dialog_processor = setup_dialog_processor()
+    dialog_processor = setup_dialog_processor(debug=True)
     dialog_processor.run()
