@@ -30,7 +30,7 @@ CONTINUE_MESSAGE="Can't read whole message. Check again."
 CHECK_TRIGGER="Check"
 NO_REQUEST_MESSAGE="No request."
 FURTHER_TRIGGER="Further"
-FURTHER_MESSAGE="Ask follow up question."
+FURTHER_MESSAGE="Ask a follow up question."
 ```
 
 _Note: it's recommended to use russian language for triggers._
