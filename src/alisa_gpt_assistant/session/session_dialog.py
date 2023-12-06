@@ -33,6 +33,11 @@ class SessionDialog(SessionDialogProtocol):
         self.text_reader = LongTextReader(continue_message)
         self.message_processing = BackgroundMessageProcessing()
 
+    def _reset_session(self):
+        self.dialog = None
+        self.text_reader.clear_text()
+        self.message_processing.terminate()
+
     def send(
         self, data: SessionDialogProtocol.InputData
     ) -> SessionDialogProtocol.OutputData:
@@ -49,13 +54,16 @@ class SessionDialog(SessionDialogProtocol):
                 self.text_reader.clear_text()
 
         if message.strip().lower() == self.stop_trigger.lower():
+            self._reset_session()
+
             return {
                 "message": self.goodbye_message,
                 "end_session": True,
             }
 
         if message.strip().lower() in [self.start_trigger.lower(), ""]:
-            self.dialog = None
+            self._reset_session()
+
             return {
                 "message": self.welcome_message,
                 "end_session": False,
