@@ -38,11 +38,16 @@ class ConsoleProcessor:
 
     def run(self) -> None:
         print(f'Enter "{self.exit_trigger}" to exit.')
+        is_first_iteration = True
         new_session = True
         while True:
-            message = input("You: ")
-            if message == self.exit_trigger:
-                break
+            if is_first_iteration:
+                message = ""
+                is_first_iteration = False
+            else:
+                message = input("You: ")
+                if message == self.exit_trigger:
+                    break
 
             input_data = {
                 "message": message,
