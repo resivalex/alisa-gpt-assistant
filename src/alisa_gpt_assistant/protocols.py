@@ -22,3 +22,8 @@ class SessionDialogProtocol(Protocol):
 
     def send(self, data: InputData) -> OutputData:
         ...
+
+
+class DialogProcessorProtocol(Protocol):
+    def run(self) -> None:
+        ...

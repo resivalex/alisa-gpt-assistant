@@ -36,20 +36,21 @@ class SessionDialog(SessionDialogProtocol):
         self.is_processing = False
         self.unread_dialog_text = ""
 
+    def _find_cutoff_point(self, text, max_length):
+        cutoff = max_length
+        while cutoff > max_length - self.SEARCH_WORD_BORDER_RANGE and cutoff > 0:
+            if text[cutoff].isspace():
+                break
+            cutoff -= 1
+        return cutoff if text[cutoff].isspace() else max_length
+
     def _read_dialog_text_in_parts(self):
         text = self.unread_dialog_text
 
         if len(text) > self.MAX_MESSAGE_LENGTH:
             continue_message = f"... {self.continue_message}"
             max_length = self.MAX_MESSAGE_LENGTH - len(continue_message)
-            cutoff = max_length
-            while cutoff > max_length - self.SEARCH_WORD_BORDER_RANGE and cutoff > 0:
-                if text[cutoff].isspace():
-                    break
-                cutoff -= 1
-
-            if not text[cutoff].isspace():
-                cutoff = max_length
+            cutoff = self._find_cutoff_point(text, max_length)
 
             part = text[:cutoff].rstrip()
             self.unread_dialog_text = text[cutoff:].lstrip()

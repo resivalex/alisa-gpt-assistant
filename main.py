@@ -10,6 +10,7 @@ from alisa_gpt_assistant import (
     YandexDialogsRequestToResponse,
     SessionDialog,
 )
+from alisa_gpt_assistant.protocols import DialogProcessorProtocol
 
 dotenv.load_dotenv()
 
@@ -31,26 +32,42 @@ CONTINUE_MESSAGE = os.environ["CONTINUE_MESSAGE"]
 CONTINUE_TRIGGER = os.environ["CONTINUE_TRIGGER"]
 
 
-dialog_factory = GptAssistantDialogFactory(OPENAI_API_KEY, ASSISTANT_ID)
-session_dialog = SessionDialog(
-    dialog_factory,
-    wait_message=WAIT_MESSAGE,
-    not_ready_message=NOT_READY_MESSAGE,
-    error_message=ERROR_MESSAGE,
-    start_trigger=START_TRIGGER,
-    welcome_message=WELCOME_MESSAGE,
-    stop_trigger=STOP_TRIGGER,
-    goodbye_message=GOODBYE_MESSAGE,
-    continue_message=CONTINUE_MESSAGE,
-    continue_trigger=CONTINUE_TRIGGER,
-)
-request_to_response = YandexDialogsRequestToResponse(session_dialog)
-webhook_processor = FastApiWebhookProcessor(
-    webhook_path=WEBHOOK_PATH,
-    host=HOST,
-    port=PORT,
-    body_mapper=request_to_response.map,
-)
+def setup_yandex_dialogs_processor() -> DialogProcessorProtocol:
+    dialog_factory = GptAssistantDialogFactory(OPENAI_API_KEY, ASSISTANT_ID)
+    session_dialog = SessionDialog(
+        dialog_factory,
+        wait_message=WAIT_MESSAGE,
+        not_ready_message=NOT_READY_MESSAGE,
+        error_message=ERROR_MESSAGE,
+        start_trigger=START_TRIGGER,
+        welcome_message=WELCOME_MESSAGE,
+        stop_trigger=STOP_TRIGGER,
+        goodbye_message=GOODBYE_MESSAGE,
+        continue_message=CONTINUE_MESSAGE,
+        continue_trigger=CONTINUE_TRIGGER,
+    )
+    request_to_response = YandexDialogsRequestToResponse(session_dialog)
+    webhook_processor = FastApiWebhookProcessor(
+        webhook_path=WEBHOOK_PATH,
+        host=HOST,
+        port=PORT,
+        body_mapper=request_to_response.map,
+    )
+
+    return webhook_processor
+
+
+def setup_console_processor() -> DialogProcessorProtocol:
+    ...
+
+
+def setup_dialog_processor(debug=False) -> DialogProcessorProtocol:
+    if debug:
+        return setup_console_processor()
+
+    return setup_yandex_dialogs_processor()
+
 
 if __name__ == "__main__":
-    webhook_processor.run()
+    dialog_processor = setup_dialog_processor()
+    dialog_processor.run()
