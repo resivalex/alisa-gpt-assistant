@@ -10,7 +10,8 @@ from alisa_gpt_assistant import (
     YandexDialogsRequestToResponse,
     SessionDialog,
 )
-from alisa_gpt_assistant.protocols import DialogProcessorProtocol
+from alisa_gpt_assistant.protocols import DialogProcessorProtocol, DialogFactoryProtocol
+from alisa_gpt_assistant.stubs import CountingDialogFactory, ConsoleProcessor
 
 dotenv.load_dotenv()
 
@@ -32,8 +33,7 @@ CONTINUE_MESSAGE = os.environ["CONTINUE_MESSAGE"]
 CONTINUE_TRIGGER = os.environ["CONTINUE_TRIGGER"]
 
 
-def setup_yandex_dialogs_processor() -> DialogProcessorProtocol:
-    dialog_factory = GptAssistantDialogFactory(OPENAI_API_KEY, ASSISTANT_ID)
+def create_session_dialog(dialog_factory: DialogFactoryProtocol) -> SessionDialog:
     session_dialog = SessionDialog(
         dialog_factory,
         wait_message=WAIT_MESSAGE,
@@ -46,6 +46,13 @@ def setup_yandex_dialogs_processor() -> DialogProcessorProtocol:
         continue_message=CONTINUE_MESSAGE,
         continue_trigger=CONTINUE_TRIGGER,
     )
+
+    return session_dialog
+
+
+def setup_yandex_dialogs_processor() -> DialogProcessorProtocol:
+    dialog_factory = GptAssistantDialogFactory(OPENAI_API_KEY, ASSISTANT_ID)
+    session_dialog = create_session_dialog(dialog_factory)
     request_to_response = YandexDialogsRequestToResponse(session_dialog)
     webhook_processor = FastApiWebhookProcessor(
         webhook_path=WEBHOOK_PATH,
@@ -58,7 +65,11 @@ def setup_yandex_dialogs_processor() -> DialogProcessorProtocol:
 
 
 def setup_console_processor() -> DialogProcessorProtocol:
-    ...
+    dialog_factory = CountingDialogFactory(lag_time=5, append_to_response="!")
+    session_dialog = create_session_dialog(dialog_factory)
+    console_processor = ConsoleProcessor(session_dialog)
+
+    return console_processor
 
 
 def setup_dialog_processor(debug=False) -> DialogProcessorProtocol:
