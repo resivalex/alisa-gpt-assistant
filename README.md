@@ -44,6 +44,8 @@ docker-compose up --build
 
 ## Configuration
 
+[ENG example](./.env.en.example) / [RUS example](./.env.ru.example)
+
 .env
 ```
 OPENAI_API_KEY=sk-...
