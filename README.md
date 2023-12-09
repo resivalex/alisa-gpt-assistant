@@ -1,12 +1,10 @@
-# 🤖 Alisa GPT Assistant
+# 🗣️ Alisa GPT Assistant
 
 Integration of OpenAI's GPT Assistant with Yandex Alisa via dialogs.yandex.ru.
 
 ## 📖 Usage
 
-### 🚀 Triggers
-
-Utilize Alisa scenarios to activate these triggers:
+### Triggers
 
 - **🌟 Start**: Begins a new session. The assistant sends a welcome message, signaling readiness.
 - **🔍 Check**: Dual purpose:
@@ -14,7 +12,7 @@ Utilize Alisa scenarios to activate these triggers:
    2. Long response? This continues the reading.
 - **➡️ Further**: Continues the dialogue, maintaining context for in-depth conversations.
 
-> 💡 _Tip: Use Russian for trigger commands. Configurable._
+> 💡 _Tip: Russian language is preferable for triggers. They are customizable. You can utilize Alisa "scenarios" to make the interaction even more comfortable._
 
 ### 🗨️ Conversation Example
 
@@ -34,15 +32,13 @@ Utilize Alisa scenarios to activate these triggers:
 
 ## 🚀 Launch
 
-Place a configured .env file in the project root and run the following in your terminal:
+Before launching, ensure a properly configured `.env` file is in the project root. This file contains essential settings like API keys and webhook configurations. Run the following in your terminal to start:
 
 ```bash
 docker-compose up --build
 ```
 
-## Configuration
-
-[ENG example](./.env.en.example) / [RUS example](./.env.ru.example)
+## ⚙️ Configuration
 
 .env
 ```
