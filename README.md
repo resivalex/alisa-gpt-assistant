@@ -17,16 +17,17 @@ Integration of OpenAI's GPT Assistant with Yandex Alisa via dialogs.yandex.ru.
 ### 💬 Example Conversation
 
 - **You**: "Start"
-- **Alisa**: "I'm ready."
+- **Alisa**: "I'm here."
 - **You**: "Tell a long story about the ocean."
+- **Alisa**: "Please wait."
 - **You**: "Check"
-- **Alisa**: "Not ready yet."
+- **Alisa**: "Still preparing."
 - **You**: "Check"
-- **Alisa**: "Once upon a time the Ocean... Need more? Check again."
+- **Alisa**: "Once upon a time the Ocean... Read more? Check again."
 - **You**: "Check"
 - **Alisa**: "...and so the Ocean... That's all."
 - **You**: "Further"
-- **Alisa**: "What would you like to know next?"
+- **Alisa**: "What's next?"
 - **You**: "What's the main component?"
 - **Alisa**: "Primarily, it's water."
 
