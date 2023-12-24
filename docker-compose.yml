@@ -1,16 +1,10 @@
 version: '3.9'
 services:
-  app:
+  alisa:
     container_name: alisa
     build: .
     env_file:
       - .env
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.alisa.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.alisa.entrypoints=https"
-      - "traefik.http.routers.alisa.tls.certresolver=letsEncrypt"
-      - "traefik.http.services.alisa.loadbalancer.server.port=${PORT:-8000}"
     networks:
       - web
 networks:
