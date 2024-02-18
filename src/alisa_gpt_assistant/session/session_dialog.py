@@ -40,7 +40,12 @@ class SessionDialog(SessionDialogProtocol):
         self.further_message = further_message
 
         self.dialog: DialogProtocol | None = None
-        self.text_reader = LongTextReader(continue_message)
+
+        self.text_reader = LongTextReader(
+            continue_message,
+            max_message_length=1020,
+            search_word_border_range=20,
+        )
         self.message_processing = BackgroundMessageProcessing()
 
     def _reset_session(self):
