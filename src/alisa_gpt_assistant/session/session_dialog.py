@@ -1,4 +1,8 @@
-from alisa_gpt_assistant.protocols import SessionDialogProtocol, DialogFactoryProtocol
+from alisa_gpt_assistant.protocols import (
+    SessionDialogProtocol,
+    DialogFactoryProtocol,
+    DialogProtocol,
+)
 
 from .long_text_reader import LongTextReader
 from .background_message_processing import BackgroundMessageProcessing
@@ -35,7 +39,7 @@ class SessionDialog(SessionDialogProtocol):
         self.further_trigger = further_trigger
         self.further_message = further_message
 
-        self.dialog = None
+        self.dialog: DialogProtocol | None = None
         self.text_reader = LongTextReader(continue_message)
         self.message_processing = BackgroundMessageProcessing()
 

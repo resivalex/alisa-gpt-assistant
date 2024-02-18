@@ -13,6 +13,7 @@ black = {extras = ["d"], version = "^23.11.0"}
 python-dotenv = "^1.0.0"
 uvicorn = "^0.24.0.post1"
 fastapi = "^0.104.1"
+mypy = "^1.8.0"
 
 
 [build-system]

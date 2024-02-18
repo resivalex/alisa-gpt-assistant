@@ -8,7 +8,7 @@ class CountingDialog:
         self.lag_time = lag_time
         self.append_to_response = append_to_response
 
-        self.messages = []
+        self.messages: list[str] = []
 
     def send(self, message: str) -> str:
         time.sleep(self.lag_time)
@@ -49,7 +49,7 @@ class ConsoleProcessor:
                 if message == self.exit_trigger:
                     break
 
-            input_data = {
+            input_data: SessionDialogProtocol.InputData = {
                 "message": message,
                 "new_session": new_session,
             }
