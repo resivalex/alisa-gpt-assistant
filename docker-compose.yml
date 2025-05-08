@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     networks:
-      - web
+      - traefik
 networks:
-    web:
+    traefik:
         external: true
